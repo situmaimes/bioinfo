@@ -2,7 +2,6 @@ import sys
 from calculate import caldis,calangle
 
 
-
 def main(argv):
     if len(argv)==1:
         print("Input main.py -h for help")

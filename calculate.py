@@ -72,7 +72,7 @@ def caldis(modelAtomInfo,AtomInfo):
     AtomRes,AtomName=AtomInfo
     AtomName = AtomName.upper()
     AtomResName=AtomRes[0:3].upper()
-    AtomResId=str(AtomRes[3])
+    AtomResId=str(AtomRes[3:])
     modelAtomLine=None
     AtomLine=None      #this two param is to store the line we need
     #get modelatomline
@@ -93,17 +93,23 @@ def caldis(modelAtomInfo,AtomInfo):
         line=f.readline().strip()
         while(line):
             if line.startswith("ATOM"):
-                if re.search(AtomName+r"[ ]*"+AtomResName+" A [ ]*"+AtomResId,line):
+                if re.match(AtomName+r"[ ]*"+AtomResName+r" A [ ]*"+AtomResId+r"\Z",line[13:26]):
                     AtomLine = line
                     break
             line=f.readline().strip()
+
     if modelAtomLine and AtomLine:
         Atom1=processAtom(modelAtomLine)[1]
         Atom2=processAtom(AtomLine)[1]
-    else:
-        print("Not found")
+    elif modelAtomLine is None:
+        print("Atom in the lig_out not found")
         return -1
-
+    elif AtomLine is None:
+        print("Atom in the rep not found")
+        return -1
+    else:
+        print("Both atoms not found")
+        return -1
     dis=calDis(Atom1,Atom2)
     return dis
 
@@ -148,11 +154,11 @@ def calangle(modelAtomInfo,Atom1Info,Atom2Info):
     Atom1Res, Atom1Name = Atom1Info
     Atom1Name=Atom1Name.upper()
     Atom1ResName = Atom1Res[0:3].upper()
-    Atom1ResId = str(Atom1Res[3])
+    Atom1ResId = str(Atom1Res[3:])
     Atom2Res, Atom2Name = Atom2Info
     Atom2Name = Atom2Name.upper()
     Atom2ResName = Atom2Res[0:3].upper()
-    Atom2ResId = str(Atom2Res[3])
+    Atom2ResId = str(Atom2Res[3:])
     modelAtomLine=Atom1Line=Atom2Line=None
     with open("lig_out.pdbqt") as f:
         #decide if line is in the model or not
@@ -173,10 +179,10 @@ def calangle(modelAtomInfo,Atom1Info,Atom2Info):
             Atom1found=False
             Atom2found=False    #to decide if we have found the info
             if line.startswith("ATOM"):
-                if re.search(Atom1Name+r"[ ]*"+Atom1ResName+" A [ ]*"+Atom1ResId,line):
+                if re.match(AtomName+r"[ ]*"+AtomResName+r" A [ ]*"+AtomResId+r"\Z",line[13:26]):
                     Atom1Line = line
                     Atom1found=True
-                if re.search(Atom2Name+r"[ ]*"+Atom2ResName+" A [ ]*"+Atom2ResId,line):
+                if re.match(AtomName+r"[ ]*"+AtomResName+r" A [ ]*"+AtomResId+r"\Z",line[13:26]):
                     Atom2Line=line
                     Atom2found=True
             #both have been found and break
@@ -188,8 +194,11 @@ def calangle(modelAtomInfo,Atom1Info,Atom2Info):
         Atom2=processAtom(Atom1Line)[1]
         Atom3=processAtom(Atom2Line)[1]
         return calAngle(Atom1,Atom2,Atom3)
+    elif modelAtomLine is None:
+        print("Atom in the lig_out not found")
+        return -1
     else:
-        print("Not found")
+        print("Atom in the rep not found")
         return -1
 
 
